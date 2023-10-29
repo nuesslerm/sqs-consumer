@@ -1417,7 +1417,24 @@ describe('Consumer', () => {
       sandbox.assert.notCalled(optionUpdatedListener);
     });
 
-    it('updates the batchSize option and emits an event', () => {
+    it('updates the batchSize option and emits an event on non-FIFO queue', () => {
+      const optionUpdatedListener = sandbox.stub();
+      consumer.on('option_updated', optionUpdatedListener);
+
+      consumer.updateOption('batchSize', 412);
+
+      assert.equal(consumer.batchSize, 412);
+
+      sandbox.assert.calledWithMatch(optionUpdatedListener, 'batchSize', 4);
+    });
+
+    it('updates the batchSize option and emits an event on FIFO queue', () => {
+      consumer = new Consumer({
+        region: REGION,
+        queueUrl: `${QUEUE_URL}.fifo`,
+        handleMessage
+      });
+
       const optionUpdatedListener = sandbox.stub();
       consumer.on('option_updated', optionUpdatedListener);
 
@@ -1428,7 +1445,26 @@ describe('Consumer', () => {
       sandbox.assert.calledWithMatch(optionUpdatedListener, 'batchSize', 4);
     });
 
-    it('does not update the batchSize if the value is more than 10', () => {
+    it('does not update the batchSize if the value is more than 1000 on non-FIFO queue', () => {
+      const optionUpdatedListener = sandbox.stub();
+      consumer.on('option_updated', optionUpdatedListener);
+
+      assert.throws(() => {
+        consumer.updateOption('batchSize', 1003);
+      }, 'batchSize must be between 1 and 1000.');
+
+      assert.equal(consumer.batchSize, 1);
+
+      sandbox.assert.notCalled(optionUpdatedListener);
+    });
+
+    it('does not update the batchSize if the value is more than 10 on FIFO queue', () => {
+      consumer = new Consumer({
+        region: REGION,
+        queueUrl: `${QUEUE_URL}.fifo`,
+        handleMessage
+      });
+
       const optionUpdatedListener = sandbox.stub();
       consumer.on('option_updated', optionUpdatedListener);
 
@@ -1441,7 +1477,26 @@ describe('Consumer', () => {
       sandbox.assert.notCalled(optionUpdatedListener);
     });
 
-    it('does not update the batchSize if the value is less than 1', () => {
+    it('does not update the batchSize if the value is less than 1 on non-FIFO queue', () => {
+      const optionUpdatedListener = sandbox.stub();
+      consumer.on('option_updated', optionUpdatedListener);
+
+      assert.throws(() => {
+        consumer.updateOption('batchSize', 0);
+      }, 'batchSize must be between 1 and 10.');
+
+      assert.equal(consumer.batchSize, 1);
+
+      sandbox.assert.notCalled(optionUpdatedListener);
+    });
+
+    it('does not update the batchSize if the value is less than 1 on FIFO queue', () => {
+      consumer = new Consumer({
+        region: REGION,
+        queueUrl: `${QUEUE_URL}.fifo`,
+        handleMessage
+      });
+
       const optionUpdatedListener = sandbox.stub();
       consumer.on('option_updated', optionUpdatedListener);
 

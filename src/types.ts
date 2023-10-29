@@ -21,8 +21,7 @@ export interface ConsumerOptions {
   /**
    * The number of messages to request from SQS when polling (default `1`).
    *
-   * This cannot be higher than the
-   * [AWS limit of 10](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/quotas-messages.html).
+   * This cannot be higher than the AWS limit of 10000 (10 using FIFO queues).
    * @defaultvalue `1`
    */
   batchSize?: number;

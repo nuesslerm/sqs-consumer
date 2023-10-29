@@ -15,11 +15,17 @@ function validateOption(
   strict?: boolean
 ): void {
   switch (option) {
-    case 'batchSize':
-      if (value > 10 || value < 1) {
-        throw new Error('batchSize must be between 1 and 10.');
+    case 'batchSize': {
+      const isFIFO = allOptions.queueUrl.endsWith('.fifo');
+
+      if (isFIFO && (value > 10 || value < 1)) {
+        throw new Error('SQS batchSize option must be between 1 and 10.');
+      }
+      if (!isFIFO && (value > 10000 || value < 1)) {
+        throw new Error('SQS batchSize option must be between 1 and 10000.');
       }
       break;
+    }
     case 'heartbeatInterval':
       if (
         !allOptions.visibilityTimeout ||
